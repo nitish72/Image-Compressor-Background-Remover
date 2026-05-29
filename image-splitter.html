@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniMedia Studio - Ultimate Image & PDF Suite</title>
+  
+  <!-- Styling Sheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Third Party Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  
+  <!-- Lucide Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <i data-lucide="layers"></i>
+      </div>
+      <span>OmniMedia Studio</span>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item active" data-target="mod-crop-split">
+        <i data-lucide="crop"></i> Crop &amp; Split Tool
+      </li>
+      <li class="nav-item" data-target="mod-converter">
+        <i data-lucide="refresh-cw"></i> Image Converter
+      </li>
+      <li class="nav-item" data-target="mod-compressor">
+        <i data-lucide="minimize"></i> Image Compressor
+      </li>
+      <li class="nav-item" data-target="mod-upscaler">
+        <i data-lucide="sparkles"></i> AI-Style Enhancer
+      </li>
+      <li class="nav-item" data-target="mod-resizer">
+        <i data-lucide="maximize-2"></i> Image Resizer
+      </li>
+      <li class="nav-item" data-target="mod-pdf">
+        <i data-lucide="file-text"></i> PDF Document Hub
+      </li>
+      <li class="nav-item" data-target="mod-svg">
+        <i data-lucide="feather"></i> SVG Rendering Tools
+      </li>
+      <li class="nav-item" data-target="mod-bg-remover">
+        <i data-lucide="user-x"></i> Background Remover
+      </li>
+    </ul>
+    
+    <!-- Global Reset Sidebar Option -->
+    <div class="sidebar-global-reset">
+      <button id="global-reset-btn" class="btn btn-danger-outline" style="width: 100%;">
+        <i data-lucide="rotate-ccw"></i> Global Reset Studio
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <div id="main-content">
+    <header>
+      <div class="header-title-container">
+        <button class="mobile-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
+          <i data-lucide="menu"></i>
+        </button>
+        <h2 id="view-title">Crop &amp; Split Tool</h2>
+      </div>
+      <div class="badge">v2.5 Local Core</div>
+    </header>
+
+    <main class="app-viewport">
+
+      <!-- MODULE 1: CROP & SPLIT -->
+      <section id="mod-crop-split" class="tab-pane active">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Visual Layout Configuration Grid</div>
+            
+            <div class="drop-zone" id="cs-drop-zone">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Drag &amp; Drop Image or Click to Browse</p>
+              <span class="hint">Supports PNG, JPG, WEBP formats</span>
+              <input type="file" id="cs-file-input" accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset File</span>
+            </div>
+            <div class="file-queue" id="cs-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Preview Matrix Engine</div>
+            <div class="preview-canvas-box">
+              <img id="preview-img-split" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><rect width='100' height='60' fill='%230b0d14'/></svg>" alt="Split Preview">
+              <div id="cs-grid-overlay" class="grid-overlay"></div>
+            </div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Generated Output Slices</div>
+            <div class="gallery-grid" id="cs-output-grid"></div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Crop Configurations</h3>
+            
+            <div class="input-row">
+              <div class="form-group">
+                <label>Columns Matrix</label>
+                <input type="number" id="cs-cols" value="3" min="1">
+              </div>
+              <div class="form-group">
+                <label>Rows Matrix</label>
+                <input type="number" id="cs-rows" value="3" min="1">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Crop Padding Inset (px)</label>
+              <div class="range-wrap">
+                <input type="range" id="cs-padding-adjustment" min="-40" max="40" value="0">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Export Format</label>
+              <select id="cs-export-format">
+                <option value="image/webp" selected>WEBP (.webp)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>WebP/JPEG Quality Profile</label>
+              <div class="range-wrap">
+                <input type="range" id="cs-quality" min="10" max="100" value="75">
+                <span id="cs-quality-val" class="range-val">75%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="cs-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="scissors"></i> Process Slices
+              </button>
+              <div class="action-row-secondary">
+                <button id="cs-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="cs-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="cs-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="cs-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 2: CONVERTER -->
+      <section id="mod-converter" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Batch Processing Format Converter</div>
+            <div class="drop-zone" id="conv-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Drag &amp; Drop Assets or Click to Choose Files</p>
+              <span class="hint">Supports PNG, JPG, WEBP, SVG, BMP, GIF, TIFF files</span>
+              <input type="file" id="conv-file-input" multiple accept="image/*,.tiff,.bmp,.svg">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="conv-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Conversion Output Pipeline</div>
+            <div class="gallery-grid" id="conv-output-grid"></div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Conversion Settings</h3>
+            
+            <div class="form-group">
+              <label>Target Export Format</label>
+              <select id="conv-target-format">
+                <option value="image/webp" selected>WEBP (.webp)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Compression Render Quality</label>
+              <div class="range-wrap">
+                <input type="range" id="conv-quality" min="10" max="100" value="85">
+                <span id="conv-quality-val" class="range-val">85%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="conv-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="refresh-cw"></i> Process Conversion
+              </button>
+              <div class="action-row-secondary">
+                <button id="conv-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="conv-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="conv-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="conv-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 3: COMPRESSOR -->
+      <section id="mod-compressor" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Optimization Pipeline Compressor</div>
+            <div class="drop-zone" id="comp-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Drag &amp; Drop Images or Click to Upload</p>
+              <span class="hint">Upload PNG, JPG, WEBP assets for compression</span>
+              <input type="file" id="comp-file-input" multiple accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="comp-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Optimized Payloads Table</div>
+            <div style="overflow-x: auto;">
+              <table id="comp-table">
+                <thead>
+                  <tr>
+                    <th>Source Asset</th>
+                    <th>Source Size</th>
+                    <th>Optimized Size</th>
+                    <th>Saved Delta</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="comp-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Compression Settings</h3>
+            
+            <div class="form-group">
+              <label>Optimization Preset</label>
+              <select id="comp-preset-mode">
+                <option value="low">Low Optimization (Fidelity Focus)</option>
+                <option value="medium">Medium Balance</option>
+                <option value="high">High Compression (Size Focus)</option>
+                <option value="custom" selected>Custom Quality Profile</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="comp-custom-quality-wrapper">
+              <label>Target WebP Quality</label>
+              <div class="range-wrap">
+                <input type="range" id="comp-quality" min="1" max="100" value="70">
+                <span id="comp-quality-val" class="range-val">70%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="comp-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="cpu"></i> Process Compression
+              </button>
+              <div class="action-row-secondary">
+                <button id="comp-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="comp-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="comp-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="comp-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 4: AI-STYLE ENHANCER -->
+      <section id="mod-upscaler" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">High Fidelity Filter &amp; Matrix Sharpener</div>
+            <div class="drop-zone" id="up-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Select or Drop Image for Filtering</p>
+              <span class="hint">Upload one or multiple images</span>
+              <input type="file" id="up-file-input" accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="up-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Interactive Split-Screen Viewer</div>
+            <div class="comparison-container" id="comp-viewer-box">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><rect width='100' height='60' fill='%230b0d14'/></svg>" class="comp-img" id="up-img-before" alt="Original Image">
+              <div class="comp-img-overlay" id="up-overlay-container">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><rect width='100' height='60' fill='%230b0d14'/></svg>" id="up-img-after" alt="Enhanced Image">
+              </div>
+              <div class="comp-slider" id="up-divider-slit"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Enhancement Filters</h3>
+            
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-sharpen" checked> Apply High-Pass Sharpening
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-clarity"> Apply Contrast Equalizer
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-color"> Enhance Chroma Subsampling
+            </label>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="up-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="sparkles"></i> Apply Filter Pass
+              </button>
+              <div class="action-row-secondary">
+                <button id="up-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="up-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="up-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="up-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 5: IMAGE RESIZER -->
+      <section id="mod-resizer" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Bilinear Interpolation Resizer</div>
+            <div class="drop-zone" id="resize-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Upload Image to Resize</p>
+              <span class="hint">Upload one or multiple files</span>
+              <input type="file" id="resize-file-input" accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="resize-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Preset Configurations</div>
+            <div class="preset-container">
+              <button class="preset-btn" data-w="1080" data-h="1080">Instagram Square<span>1080 x 1080 px</span></button>
+              <button class="preset-btn" data-w="1080" data-h="1920">Instagram Story<span>1080 x 1920 px</span></button>
+              <button class="preset-btn" data-w="1200" data-h="630">Facebook Preview<span>1200 x 630 px</span></button>
+              <button class="preset-btn" data-w="1280" data-h="720">YouTube HD<span>1280 x 720 px</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Dimensions</h3>
+            
+            <div class="input-row">
+              <div class="form-group">
+                <label>Width (px)</label>
+                <input type="number" id="resize-width" placeholder="Auto Width">
+              </div>
+              <div class="form-group">
+                <label>Height (px)</label>
+                <input type="number" id="resize-height" placeholder="Auto Height">
+              </div>
+            </div>
+            
+            <label class="checkbox-label" style="margin-bottom:1rem;">
+              <input type="checkbox" id="resize-lock-aspect" checked> Maintain Aspect Ratio
+            </label>
+            
+            <div class="form-group">
+              <label>Target Format</label>
+              <select id="resize-format">
+                <option value="image/webp" selected>WEBP (.webp)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="resize-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="maximize-2"></i> Resize Image
+              </button>
+              <div class="action-row-secondary">
+                <button id="resize-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="resize-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="resize-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="resize-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 6: PDF HUB -->
+      <section id="mod-pdf" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Images to PDF Compiler</div>
+            <div class="drop-zone" id="pdf-img-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Select Package Images to Compile to PDF</p>
+              <span class="hint">Upload one or multiple images</span>
+              <input type="file" id="pdf-img-input" multiple accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Image Compilation Queue</span>
+            </div>
+            <div class="file-queue" id="pdf-img-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Decompile PDF to Images</div>
+            <div class="drop-zone" id="pdf-doc-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Select or Drop PDF File</p>
+              <span class="hint">Supports standard document extraction</span>
+              <input type="file" id="pdf-doc-input" accept=".pdf">
+            </div>
+            <div id="pdf-doc-meta" style="margin-top:0.5rem; font-size:0.85rem; font-weight:700; color:var(--secondary);"></div>
+            <div class="file-list-header">
+              <span>PDF Queue</span>
+            </div>
+            <div class="file-queue" id="pdf-doc-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Output Document Gallery</div>
+            <div class="gallery-grid" id="pdf-output-grid"></div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">PDF Suite Options</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Compilation Mode</label>
+              <label class="radio-label">
+                <input type="radio" name="pdf-page-mode" value="single" checked> Combine to Single Multi-Page PDF
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="pdf-page-mode" value="multi"> Each Image as Separate PDF
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label>Decomp Page Extraction Format</label>
+              <select id="pdf-extract-format">
+                <option value="image/webp" selected>WEBP (.webp)</option>
+                <option value="image/png">PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="pdf-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="file-text"></i> Compile/Extract PDF
+              </button>
+              <div class="action-row-secondary">
+                <button id="pdf-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="pdf-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="pdf-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="pdf-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 7: SVG RENDERER -->
+      <section id="mod-svg" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">Vector Graph Core Engine Converter</div>
+            <div class="drop-zone" id="svg-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Upload Scalable Vector File (.svg)</p>
+              <span class="hint">Upload one or multiple SVG documents</span>
+              <input type="file" id="svg-file-input" accept=".svg,image/svg+xml">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="svg-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Vector Conversion Gallery</div>
+            <div class="gallery-grid" id="svg-output-grid"></div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">SVG Rasterizer Settings</h3>
+            
+            <div class="form-group">
+              <label>Dimension Scale Multiplier</label>
+              <select id="svg-scale-factor">
+                <option value="1">Base Native Scale (1x)</option>
+                <option value="2" selected>Medium Quality (2x)</option>
+                <option value="4">High Resolution (4x)</option>
+              </select>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Background Layer Mode</label>
+              <label class="radio-label">
+                <input type="radio" name="svg-bg-mode" value="transparent" checked> Transparency (Alpha Alpha)
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="svg-bg-mode" value="solid"> Fill Solid Canvas Backing
+              </label>
+            </div>
+            
+            <div class="form-group" id="svg-solid-color-wrap" style="display:none;">
+              <label>Solid Layer Color</label>
+              <input type="text" id="svg-bg-color" value="#FFFFFF" placeholder="#FFFFFF">
+            </div>
+            
+            <div class="form-group">
+              <label>Target Format</label>
+              <select id="svg-output-format">
+                <option value="image/png" selected>PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+                <option value="image/webp">WEBP (.webp)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="svg-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="play"></i> Render Vector
+              </button>
+              <div class="action-row-secondary">
+                <button id="svg-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="svg-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="svg-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="svg-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 8: BACKGROUND REMOVER (NEW!) -->
+      <section id="mod-bg-remover" class="tab-pane">
+        <div class="workspace-main">
+          <div class="panel-card">
+            <div class="panel-title">SaaS Background Removal Engine</div>
+            <div class="drop-zone" id="bg-drop">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <p>Drag &amp; Drop Image or Click to Upload</p>
+              <span class="hint">Supports PNG, JPG, WEBP foreground assets</span>
+              <input type="file" id="bg-file-input" accept="image/*">
+            </div>
+            
+            <div class="file-list-header">
+              <span>Uploaded Asset Files</span>
+            </div>
+            <div class="file-queue" id="bg-queue"></div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Interactive Before / After Removal Canvas</div>
+            
+            <div class="comparison-container" id="bg-comparison-box">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><rect width='100' height='60' fill='%230b0d14'/></svg>" class="comp-img" id="bg-img-before" alt="Original Image">
+              <div class="comp-img-overlay" id="bg-overlay-container">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='60'><rect width='100' height='60' fill='%230b0d14'/></svg>" id="bg-img-after" alt="Processed Transparent Output">
+              </div>
+              <div class="comp-slider" id="bg-divider-slit"></div>
+            </div>
+            <div class="progress-bar-container" id="bg-progress-bar">
+              <div class="progress-bar-fill" id="bg-progress-fill"></div>
+            </div>
+          </div>
+          
+          <div class="panel-card">
+            <div class="panel-title">Processed Output Pipelines</div>
+            <div class="gallery-grid" id="bg-output-grid"></div>
+          </div>
+        </div>
+        
+        <div class="workspace-sidebar">
+          <div class="sidebar-scrollable">
+            <h3 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">Removal Options</h3>
+            
+            <div class="form-group">
+              <label>Chroma Extraction Mode</label>
+              <select id="bg-extract-mode">
+                <option value="transparent" selected>Transparent Background</option>
+                <option value="white">Solid White Background</option>
+                <option value="solid">Custom Solid Color</option>
+                <option value="gradient">Custom Gradient Fills</option>
+                <option value="image">Custom Image Overlay</option>
+              </select>
+            </div>
+
+            <!-- Solid Color Config Sub-Panel -->
+            <div id="bg-solid-config-group" style="display:none; border:1px solid var(--border-glass); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.25rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Solid Background Color</label>
+              <div class="color-picker-group">
+                <input type="color" id="bg-solid-color" value="#FFFFFF">
+                <div class="color-swatches">
+                  <div class="swatch white" data-color="#FFFFFF"></div>
+                  <div class="swatch black" data-color="#000000"></div>
+                  <div class="swatch red" data-color="#ef4444"></div>
+                  <div class="swatch blue" data-color="#3b82f6"></div>
+                  <div class="swatch green" data-color="#10b981"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gradient Config Sub-Panel -->
+            <div id="bg-gradient-config-group" style="display:none; border:1px solid var(--border-glass); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.25rem; display:flex; flex-direction:column; gap:1rem;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Gradient Shape</label>
+                <select id="bg-gradient-type">
+                  <option value="linear" selected>Linear Gradient</option>
+                  <option value="radial">Radial Gradient</option>
+                </select>
+              </div>
+              
+              <div class="input-row">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Start Color</label>
+                  <input type="color" id="bg-grad-start" value="#6366f1" style="width:100%; height:40px;">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>End Color</label>
+                  <input type="color" id="bg-grad-end" value="#06b6d4" style="width:100%; height:40px;">
+                </div>
+              </div>
+              
+              <div class="form-group" id="bg-grad-angle-group" style="margin-bottom:0;">
+                <label>Angle (Degrees)</label>
+                <div class="range-wrap">
+                  <input type="range" id="bg-grad-angle" min="0" max="360" value="135">
+                  <span id="bg-grad-angle-val" class="range-val">135°</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Image Config Sub-Panel -->
+            <div id="bg-image-config-group" style="display:none; border:1px solid var(--border-glass); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1.25rem;">
+              <label style="font-size:0.8rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Custom Background Asset</label>
+              <div class="drop-zone" id="bg-bgimg-drop" style="padding:1.5rem 1rem;">
+                <i data-lucide="image" class="upload-icon" style="width:32px; height:32px;"></i>
+                <p style="font-size:0.85rem;">Upload Background</p>
+                <input type="file" id="bg-bgimg-input" accept="image/*">
+              </div>
+              <div id="bg-bgimg-meta" style="margin-top:0.5rem; font-size:0.75rem; font-weight:700; color:var(--secondary); text-align:center;"></div>
+            </div>
+
+            <!-- Tolerance Sliders -->
+            <div class="form-group">
+              <label>Background Color Tolerance</label>
+              <div class="range-wrap">
+                <input type="range" id="bg-tolerance" min="1" max="100" value="18">
+                <span id="bg-tolerance-val" class="range-val">18%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Edge Feathering Smoothing</label>
+              <div class="range-wrap">
+                <input type="range" id="bg-feather" min="0" max="20" value="2">
+                <span id="bg-feather-val" class="range-val">2px</span>
+              </div>
+            </div>
+
+            <h3 style="font-family:var(--font-display); font-size:1rem; margin-top:1.5rem; margin-bottom:0.75rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.25rem;">Chained Workflow Pipeline</h3>
+            
+            <label class="checkbox-label">
+              <input type="checkbox" id="chain-bg" checked disabled> Remove Background
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="chain-enhance"> Apply High-Pass Sharpening
+            </label>
+            
+            <!-- Chain Resize -->
+            <label class="checkbox-label">
+              <input type="checkbox" id="chain-resize"> Resize Output Dimensions
+            </label>
+            <div id="chain-resize-group" style="display:none; padding-left:1.5rem; margin-top:0.5rem; margin-bottom:0.5rem;">
+              <div class="input-row">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Width</label>
+                  <input type="number" id="chain-resize-w" placeholder="1080">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Height</label>
+                  <input type="number" id="chain-resize-h" placeholder="1080">
+                </div>
+              </div>
+            </div>
+
+            <!-- Chain Convert -->
+            <label class="checkbox-label">
+              <input type="checkbox" id="chain-convert"> Convert Format &amp; Compress
+            </label>
+            <div id="chain-convert-group" style="display:none; padding-left:1.5rem; margin-top:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Target Format</label>
+                <select id="chain-export-format">
+                  <option value="image/png">PNG (.png)</option>
+                  <option value="image/webp" selected>WEBP (.webp)</option>
+                  <option value="image/jpeg">JPEG (.jpg)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Quality</label>
+                <div class="range-wrap">
+                  <input type="range" id="chain-export-quality" min="10" max="100" value="85">
+                  <span id="chain-export-quality-val" class="range-val">85%</span>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="font-family:var(--font-display); font-size:1rem; margin-top:1.5rem; margin-bottom:0.75rem; border-bottom:1px solid var(--border-glass); padding-bottom:0.25rem;">Standalone Export Settings</h3>
+
+            <div class="form-group">
+              <label>Export Format</label>
+              <select id="bg-export-format">
+                <option value="image/png" selected>PNG (.png)</option>
+                <option value="image/jpeg">JPEG (.jpg)</option>
+                <option value="image/webp">WEBP (.webp)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Render Quality</label>
+              <div class="range-wrap">
+                <input type="range" id="bg-export-quality" min="10" max="100" value="95">
+                <span id="bg-export-quality-val" class="range-val">95%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sidebar-footer">
+            <div class="action-grid">
+              <button id="bg-process-btn" class="btn btn-primary" disabled>
+                <i data-lucide="sparkles"></i> Process Workflow
+              </button>
+              <div class="action-row-secondary">
+                <button id="bg-download-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="download"></i> Download Selected
+                </button>
+                <button id="bg-zip-btn" class="btn btn-secondary" disabled>
+                  <i data-lucide="archive"></i> Download ZIP
+                </button>
+              </div>
+              <div class="action-row-tertiary">
+                <button id="bg-reset-btn" class="btn btn-danger-outline">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+                <button id="bg-clear-btn" class="btn btn-danger-outline">
+                  <i data-lucide="trash-2"></i> Clear Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Client Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
